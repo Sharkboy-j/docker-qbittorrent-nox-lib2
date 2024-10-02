@@ -20,7 +20,7 @@ RUN \
 FROM base AS builder
 
 ARG QBT_VERSION
-ARG LIBBT_VERSION="RC_1_2"
+ARG LIBBT_VERSION="RC_2_0"
 ARG LIBBT_CMAKE_FLAGS=""
 
 # check environment variables
