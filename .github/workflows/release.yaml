@@ -23,12 +23,12 @@ jobs:
     strategy:
       matrix:
         platform:
-          - "linux/386"
+          #- "linux/386"
           - "linux/amd64"
-          - "linux/arm/v6"
-          - "linux/arm/v7"
-          - "linux/arm64/v8"
-          - "linux/riscv64"
+          #- "linux/arm/v6"
+          #- "linux/arm/v7"
+          #- "linux/arm64/v8"
+          #- "linux/riscv64"
 
     steps:
       - name: Checkout repository
@@ -62,21 +62,21 @@ jobs:
             org.opencontainers.image.authors=https://github.com/qbittorrent/qBittorrent/graphs/contributors
             org.opencontainers.image.base.name=docker.io/alpine:latest
             org.opencontainers.image.description=An advanced BitTorrent client programmed in C++, based on Qt toolkit and libtorrent-rasterbar
-            org.opencontainers.image.documentation=https://github.com/Sharkboy-j/docker-qbittorrent-nox-lib2#qbittorrent-nox-docker-image-
+            org.opencontainers.image.documentation=https://github.com/sharkboy-j/docker-qbittorrent-nox-lib2#qbittorrent-nox-docker-image-
             org.opencontainers.image.created=${{ steps.set-variables.outputs.DATE }}
             org.opencontainers.image.licenses=GPL-3.0+
             org.opencontainers.image.ref.name=${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.source=https://github.com/Sharkboy-j/docker-qbittorrent-nox-lib2
+            org.opencontainers.image.source=https://github.com/sharkboy-j/docker-qbittorrent-nox-lib2
             org.opencontainers.image.title=qbittorrent-nox docker image
-            org.opencontainers.image.url=https://github.com/Sharkboy-j/docker-qbittorrent-nox-lib2
+            org.opencontainers.image.url=https://github.com/sharkboy-j/docker-qbittorrent-nox-lib2
             org.opencontainers.image.vendor=qBittorrent
             org.opencontainers.image.version=${{ env.QBT_VERSION }}
           load: true
           platforms: ${{ matrix.platform }}
           tags: |
             sharkboy/qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
-            ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
+            ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
 
       - name: Test run
         run: |
@@ -126,7 +126,7 @@ jobs:
       - name: Upload to registries
         run: |
           docker push sharkboy/qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
-          docker push ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
+          docker push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
 
 
   upload:
@@ -152,41 +152,21 @@ jobs:
         run: |
           docker manifest create \
             sharkboy/qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-386 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-amd64 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-arm-v6 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-arm-v7 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-arm64-v8 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-riscv64
+            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-amd64
           docker manifest create \
             sharkboy/qbittorrent-nox-lib2:latest \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-386 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-amd64 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-arm-v6 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-arm-v7 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-arm64-v8 \
-            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-riscv64
+            --amend sharkboy/qbittorrent-nox-lib2:latest-linux-amd64
           docker manifest create \
-            ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-386 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-amd64 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-arm-v6 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-arm-v7 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-arm64-v8 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-riscv64
+            ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
+            --amend ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-amd64
           docker manifest create \
-            ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-386 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-amd64 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-arm-v6 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-arm-v7 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-arm64-v8 \
-            --amend ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-riscv64
+            ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest \
+            --amend ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-amd64
 
       - name: Upload to registries
         run: |
           docker manifest push sharkboy/qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
           docker manifest push sharkboy/qbittorrent-nox-lib2:latest
-          docker manifest push ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
-          docker manifest push ghcr.io/Sharkboy-j/docker-qbittorrent-nox-lib2:latest
+          docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
+          docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest
           echo "::notice Remember to remove latest-* tags from Docker Hub!"
