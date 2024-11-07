@@ -14,6 +14,7 @@ env:
   # This is a positive integer number that allows to differentiate between consecutive builds of the same qBittorrent version.
   # When `QBT_VERSION` is incremented, this value must reset to 1.
   TAG_RELEASE_NUMBER: 1
+  QBT_VERSION: unknown
 
 jobs:
   build:
@@ -40,6 +41,13 @@ jobs:
           echo "DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
           echo "PLATFORM_NAME=${{ matrix.platform }}" | sed 's|/|-|g' >> $GITHUB_OUTPUT
 
+      - name: Fetch Local Tag
+        id: fetch_local_tag
+        run: |
+          LATEST_LOCAL_TAG=$(curl -s https://api.github.com/repos/Sharkboy-j/docker-qbittorrent-nox-lib2/tags | jq -r '.[0].name')
+          echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> $GITHUB_ENV
+          echo "Fetched version without prefix: $LATEST_LOCAL_TAG"
+
       - name: Fetch Latest Tag from qBittorrent
         id: fetch_tag
         run: |
@@ -47,13 +55,6 @@ jobs:
           VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^release-//')
           echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
           echo "Fetched version without prefix: $VERSION_NUMBER"
-
-      - name: Fetch Local Tag
-        id: fetch_local_tag
-        run: |
-          LATEST_LOCAL_TAG=$(curl -s https://api.github.com/repos/Sharkboy-j/docker-qbittorrent-nox-lib2/tags | jq -r '.[0].name')
-          echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> $GITHUB_ENV
-          echo "Fetched version without prefix: $LATEST_LOCAL_TAG"
           
       - name: Compare Versions and Break if Equal
         id: compare_versions
