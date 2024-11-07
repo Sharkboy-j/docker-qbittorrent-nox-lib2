@@ -11,8 +11,6 @@ permissions:
   packages: write
 
 env:
-  QBT_VERSION: "5.0.1"
-
   # This is a positive integer number that allows to differentiate between consecutive builds of the same qBittorrent version.
   # When `QBT_VERSION` is incremented, this value must reset to 1.
   TAG_RELEASE_NUMBER: 1
@@ -42,6 +40,16 @@ jobs:
           echo "DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
           echo "PLATFORM_NAME=${{ matrix.platform }}" | sed 's|/|-|g' >> $GITHUB_OUTPUT
 
+      - name: Fetch Latest Tag from qBittorrent
+        id: fetch_tag
+        run: |
+          LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
+          echo "Latest tag fetched: $LATEST_TAG"
+          echo "QBT_VERSION=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Display Latest Tag
+        run: echo "The latest qBittorrent tag is ${{ steps.fetch_tag.outputs.LATEST_TAG }}"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         if: (matrix.platform != 'linux/386') && (matrix.platform != 'linux/amd64')
@@ -54,15 +62,6 @@ jobs:
           buildkitd-config-inline: |
             [worker.oci]
               max-parallelism = 1
-
-      - name: Send Telegram Notificationtest
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_BOT_ID }}
-        run: |
-          curl -s -o /dev/null -X POST https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage \
-            -d chat_id=$TELEGRAM_CHAT_ID \
-            -d text="QBT Realeased ${{ env.QBT_VERSION }} ${{ env.TAG_RELEASE_NUMBER }} "
 
       - name: Build image
         uses: docker/build-push-action@v6
@@ -182,7 +181,7 @@ jobs:
           docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest
           echo "::notice Remember to remove latest-* tags from Docker Hub!"
           
-      - name: Send Telegram Notification
+      - name: Send Telegram Notificationtest
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_BOT_ID }}
