@@ -48,6 +48,23 @@ jobs:
           echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
           echo "Fetched version without prefix: $VERSION_NUMBER"
 
+      - name: Fetch Local Tag
+        id: fetch_local_tag
+        run: |
+          LATEST_LOCAL_TAG=$(curl -s https://api.github.com/repos/Sharkboy-j/docker-qbittorrent-nox-lib2/tags | jq -r '.[0].name')
+          echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> $GITHUB_ENV
+          echo "Fetched version without prefix: $LATEST_LOCAL_TAG"
+          
+      - name: Compare Versions and Break if Equal
+        id: compare_versions
+        run: |
+          echo "Comparing QBT_VERSION ($QBT_VERSION) with QBT_LOCAL_VERSION ($QBT_LOCAL_VERSION)"
+          
+          if [ "$QBT_VERSION" == "$QBT_LOCAL_VERSION" ]; then
+            echo "Versions match, exiting workflow."
+            exit 0  # Exit the workflow if versions are equal
+          fi
+          
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         if: (matrix.platform != 'linux/386') && (matrix.platform != 'linux/amd64')
@@ -178,7 +195,32 @@ jobs:
           docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
           docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest
           echo "::notice Remember to remove latest-* tags from Docker Hub!"
+      
+      - name: Create Release Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QBT_VERSION: ${{ env.QBT_VERSION }}
+        run: |
+          # Create an annotated tag
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$QBT_VERSION" -m "$QBT_VERSION"
+
+          # Push the tag to the repository
+          git push origin "$QBT_VERSION"
           
+      - name: Create Release
+        env:
+          QBT_VERSION: ${{ env.QBT_VERSION }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_release
+        uses: actions/create-release@v1.0.1
+        with:
+          tag_name: ${{ env.QBT_VERSION }}
+          release_name: ${{ env.QBT_VERSION }}
+          draft: false
+          prerelease: false
+        
       - name: Send Telegram Notificationtest
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
