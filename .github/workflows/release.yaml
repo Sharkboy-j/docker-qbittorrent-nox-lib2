@@ -59,9 +59,9 @@ jobs:
       - name: Compare Versions and Break if Equal
         id: compare_versions
         run: |
-          echo "Comparing QBT_VERSION ($QBT_VERSION) with QBT_LOCAL_VERSION ($QBT_LOCAL_VERSION)"
+          echo "Comparing QBT_VERSION (${{ env.QBT_VERSION }}) with QBT_LOCAL_VERSION ($QBT_LOCAL_VERSION)"
           
-          if [ "$QBT_VERSION" == "$QBT_LOCAL_VERSION" ]; then
+          if [ "${{ env.QBT_VERSION }}" == "$QBT_LOCAL_VERSION" ]; then
             echo "Versions match, exiting workflow."
             exit 0  # Exit the workflow if versions are equal
           fi
