@@ -9,6 +9,7 @@ permissions:
   attestations: write
   id-token: write
   packages: write
+  contents: write
 
 env:
   # This is a positive integer number that allows to differentiate between consecutive builds of the same qBittorrent version.
