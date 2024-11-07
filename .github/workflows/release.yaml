@@ -174,17 +174,11 @@ jobs:
           echo "::notice Remember to remove latest-* tags from Docker Hub!"
           
       - name: Send Telegram Notification
-        if: ${{ success() || failure() }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_BOT_ID }}
           Q_VER: ${{ env.TAG_RELEASE_NUMBER }}
         run: |
-          STATUS="completed successfully ✅"
-          if [ ${{ failure() }} == true ]; then
-            STATUS="failed ❌"
-          fi
-
           curl -s -X POST https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage \
             -d chat_id=$TELEGRAM_CHAT_ID \
             -d text="GitHub Actions CI $STATUS for repository: $GITHUB_REPOSITORY on branch: $GITHUB_REF | ver $Q_VER"
