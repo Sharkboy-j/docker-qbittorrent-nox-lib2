@@ -173,7 +173,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-
+          
+      - name: Fetch Latest Tag from qBittorrent
+        id: fetch_tag
+        run: |
+          LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
+          VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^release-//')
+          echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
+          echo "Fetched version without prefix: $VERSION_NUMBER"
+          
       - name: Create multi-arch images
         run: |
           docker manifest create \
