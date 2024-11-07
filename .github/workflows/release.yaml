@@ -67,6 +67,8 @@ jobs:
           fi
           
       - name: Create GitHub Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create ${{ env.QBT_VERSION }} --latest
 
@@ -209,23 +211,6 @@ jobs:
           docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest
           echo "::notice Remember to remove latest-* tags from Docker Hub!"
           
-      - name: Create GitHub Tag
-        uses: qoomon/actions--create-tag@v1.0.0
-        with:
-          name: ${{ env.QBT_VERSION }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Create Release
-        env:
-          QBT_VERSION: ${{ env.QBT_VERSION }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        id: create_release
-        uses: actions/create-release@v1.0.1
-        with:
-          tag_name: ${{ env.QBT_VERSION }}
-          release_name: ${{ env.QBT_VERSION }}
-          draft: false
-          prerelease: false
         
       - name: Send Telegram Notification
         env:
