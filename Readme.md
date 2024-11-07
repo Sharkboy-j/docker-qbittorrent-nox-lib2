@@ -1,7 +1,9 @@
 # qBittorrent-nox Docker Image [![GitHub Actions CI Status](https://github.com/qbittorrent/docker-qbittorrent-nox/actions/workflows/release.yaml/badge.svg)](https://github.com/qbittorrent/docker-qbittorrent-nox/actions)
 
 Repository on Docker Hub: https://hub.docker.com/r/qbittorrentofficial/qbittorrent-nox \
-Repository on GitHub: https://github.com/qbittorrent/docker-qbittorrent-nox
+Repository on GitHub: https://github.com/qbittorrent/docker-qbittorrent-nox \
+
+
 Release Telegram notifications [@dependa_dsm_bot](https://t.me/dependa_dsm_bot)
 
 ## Supported architectures
