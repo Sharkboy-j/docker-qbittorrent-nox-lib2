@@ -2,6 +2,7 @@
 
 Repository on Docker Hub: https://hub.docker.com/r/qbittorrentofficial/qbittorrent-nox \
 Repository on GitHub: https://github.com/qbittorrent/docker-qbittorrent-nox
+Release Telegram notifications [@dependa_dsm_bot](https://t.me/dependa_dsm_bot)
 
 ## Supported architectures
 
