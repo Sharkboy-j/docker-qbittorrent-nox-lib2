@@ -66,12 +66,6 @@ jobs:
             echo "Versions match, exiting workflow."
             exit 0  # Exit the workflow if versions are equal
           fi
-          
-      - name: Create GitHub Tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create ${{ env.QBT_VERSION }} --latest
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -211,8 +205,22 @@ jobs:
           docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
           docker manifest push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest
           echo "::notice Remember to remove latest-* tags from Docker Hub!"
+
+      - name: Fetch Local Tag
+        id: fetch_local_tag
+        run: |
+          LATEST_LOCAL_TAG=$(curl -s https://api.github.com/repos/Sharkboy-j/docker-qbittorrent-nox-lib2/tags | jq -r '.[0].name')
+          echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> $GITHUB_ENV
+          echo "Fetched version without prefix: $LATEST_LOCAL_TAG"
           
-        
+      - name: Create GitHub Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ env.QBT_VERSION }} --latest
+          gh release delete ${{ env.QBT_VERSION }} -y
+          gh release delete $QBT_LOCAL_VERSION --cleanup-tag
+          
       - name: Send Telegram Notification
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
