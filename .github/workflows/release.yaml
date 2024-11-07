@@ -44,11 +44,9 @@ jobs:
         id: fetch_tag
         run: |
           LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
-          echo "Latest tag fetched: $LATEST_TAG"
-          echo "QBT_VERSION=$LATEST_TAG" >> $GITHUB_ENV
-
-      - name: Display Latest Tag
-        run: echo "The latest qBittorrent tag is ${{ steps.fetch_tag.outputs.LATEST_TAG }}"
+          VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^release-//')
+          echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
+          echo "Latest tag fetched: $QBT_VERSION"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
