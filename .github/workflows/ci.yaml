@@ -25,30 +25,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get Changelog for Specific Version
-        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
-        run: |
-          VERSION="v5.0.1"  # Specify the version you're interested in
-          REPO="qbittorrent/qBittorrent"
-          FILE_PATH="Changelog"
-          
-          # Fetch the changelog file content using GitHub API (raw URL)
-          CHANGES=$(curl -s "https://raw.githubusercontent.com/$REPO/master/$FILE_PATH")
-          
-          # Use awk to extract the section for the specified version
-          CHANGELOG_SECTION=$(echo "$CHANGES" | awk "/$VERSION/{flag=1} flag && /^$/{flag=0} flag" )
-          
-          # Output the extracted changelog for the specific version
-          echo "$CHANGELOG_SECTION"
-          echo "$CHANGELOG_SECTION" > changelog.txt
-          
-      - name: Create GitHub Tag
-        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create test --latest --notes-file changelog.txt
-
       - name: Set variables
         id: set-variables
         run: |
