@@ -67,14 +67,6 @@ jobs:
             exit 0  # Exit the workflow if versions are equal
           fi
 
-      - name: Create GitHub Tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create ${{ env.QBT_VERSION }} --latest
-          gh release delete ${{ env.QBT_VERSION }} -y
-          gh release delete $QBT_LOCAL_VERSION --cleanup-tag
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         if: (matrix.platform != 'linux/386') && (matrix.platform != 'linux/amd64')
@@ -162,7 +154,13 @@ jobs:
         run: |
           docker push sharkboy/qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
           docker push ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest-${{ steps.set-variables.outputs.PLATFORM_NAME }}
-
+          
+      - name: Create GitHub Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ env.QBT_VERSION }} --latest
+          gh release delete $QBT_LOCAL_VERSION --cleanup-tag
 
   upload:
     name: Release - Upload
