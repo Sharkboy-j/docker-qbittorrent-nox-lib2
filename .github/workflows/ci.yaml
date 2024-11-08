@@ -14,19 +14,16 @@ concurrency:
 jobs:
   job_one:
     runs-on: ubuntu-latest
-    outputs:
-      version_file: ${{ steps.set_output.outputs.file_path }}
     steps:
-      - name: Set Environment Variable
+      - name: Set Environment Variables and Save to File
         run: |
-          echo "QBT_VERSION=v5.0.1" > version.txt
-          echo "QBT_LOCAL_VERSION=v5.0.2" > version.txt
-        id: set_output
+          echo "QBT_VERSION=v5.0.1" > versions.txt
+          echo "QBT_LOCAL_VERSION=v4.9.9" >> versions.txt
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: version_file
-          path: version.txt
+          name: versions_file
+          path: versions.txt
 
   job_two:
     runs-on: ubuntu-latest
@@ -35,11 +32,11 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
-          name: version_file
+          name: versions_file
           path: .
-      - name: Read and Set Environment Variable
+      - name: Read and Set Environment Variables
         run: |
-          source version.txt
+          source versions.txt
           echo "QBT_VERSION is $QBT_VERSION"
           echo "QBT_LOCAL_VERSION is $QBT_LOCAL_VERSION"
 
