@@ -44,19 +44,19 @@ jobs:
         run: |
           LATEST_LOCAL_TAG=$(curl -s https://api.github.com/repos/Sharkboy-j/docker-qbittorrent-nox-lib2/tags | jq -r '.[0].name')
           echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> $GITHUB_ENV
-          echo "Fetched local: ${{ env.QBT_LOCAL_VERSION }}"
+          echo "Fetched local: $LATEST_LOCAL_TAG"
           
           LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
           VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^release-//')
           echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
-          echo "Fetched repo: ${{ env.QBT_VERSION }}"
+          echo "Fetched repo: $VERSION_NUMBER"
 
-          echo "QBT_VERSION=${{ env.QBT_VERSION }}" > versions.txt
-          echo "QBT_LOCAL_VERSION=${{ env.QBT_LOCAL_VERSION }}" >> versions.txt
+          echo "QBT_VERSION=$VERSION_NUMBER" > versions.txt
+          echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> versions.txt
 
-          echo "Comparing QBT_VERSION (${{ env.QBT_VERSION }}) with QBT_LOCAL_VERSION (${{ env.QBT_LOCAL_VERSION }})"
+          echo "Comparing QBT_VERSION ($VERSION_NUMBER) with QBT_LOCAL_VERSION ($LATEST_LOCAL_TAG)"
 
-          if [ "${{ env.QBT_VERSION }}" == "${{ env.QBT_LOCAL_VERSION }}" ]; then
+          if [ "$VERSION_NUMBER" == "$LATEST_LOCAL_TAG" ]; then
             echo "skipnext=true" >> $GITHUB_OUTPUT
           fi
           
