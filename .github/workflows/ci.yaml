@@ -40,14 +40,14 @@ jobs:
           
           # Output the extracted changelog for the specific version
           echo "$CHANGELOG_SECTION"
-          echo "CHANGELOG=$CHANGELOG_SECTION" >> $GITHUB_ENV
+          echo "$CHANGELOG_SECTION" > changelog.txt
           
       - name: Create GitHub Tag
         if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create test --latest -n $CHANGELOG
+          gh release create test --latest --notes-file changelog.txt
 
       - name: Set variables
         id: set-variables
