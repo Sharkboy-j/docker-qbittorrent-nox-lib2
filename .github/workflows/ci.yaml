@@ -15,18 +15,31 @@ jobs:
   job_one:
     runs-on: ubuntu-latest
     outputs:
-      QBT_VERSION: ${{ steps.set_version.outputs.version }}
+      version_file: ${{ steps.set_output.outputs.file_path }}
     steps:
-      - name: Set QBT_VERSION Output
-        id: set_version
+      - name: Set Environment Variable
         run: |
-          echo "v5.0.1"  # Replace with logic to set the version dynamically
-          echo "::set-output name=version::v5.0.1"
+          echo "QBT_VERSION=v5.0.1" > version.txt
+          echo "QBT_LOCAL_VERSION=v5.0.2" > version.txt
+        id: set_output
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: version_file
+          path: version.txt
 
   job_two:
     runs-on: ubuntu-latest
     needs: job_one
     steps:
-      - name: Use QBT_VERSION Output from Job One
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: version_file
+          path: .
+      - name: Read and Set Environment Variable
         run: |
-          echo "QBT_VERSION from job_one is ${{ needs.job_one.outputs.QBT_VERSION }}"
+          source version.txt
+          echo "QBT_VERSION is $QBT_VERSION"
+          echo "QBT_LOCAL_VERSION is $QBT_LOCAL_VERSION"
+
