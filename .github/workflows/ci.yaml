@@ -15,9 +15,6 @@ jobs:
   build:
     name: CI
     runs-on: ubuntu-latest
-    outputs:
-      QBT_VERSION: ${{ steps.set_version.outputs.version }}
-      QBT_LOCAL_VERSION: ${{ steps.set_version.outputs.local_version }}
     strategy:
       matrix:
         platform:
@@ -94,23 +91,3 @@ jobs:
         uses: actions/attest-build-provenance@v1
         with:
           subject-path: qbittorrent-nox_devel_${{ steps.set-variables.outputs.PLATFORM_NAME }}
-
-  upload:
-    name: Release - Upload
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Use QBT_VERSION Output from Job One
-        run: |
-          echo "QBT_VERSION from job_one is ${{ needs.job_one.outputs.QBT_VERSION }}"
-          echo "QBT_LOCAL_VERSION from job_one is ${{ needs.job_one.outputs.QBT_LOCAL_VERSION }}"
-
-      - name: Compare Versions and Break if Equal
-        id: compare_versions
-        run: |
-          echo "Comparing QBT_VERSION (${{ needs.job_one.outputs.QBT_VERSION }}) with QBT_LOCAL_VERSION (${{ needs.job_one.outputs.QBT_LOCAL_VERSION }})"
-          
-          if [ "${{ needs.job_one.outputs.QBT_VERSION }}" == "${{ needs.job_one.outputs.QBT_LOCAL_VERSION }}" ]; then
-            echo "skipnext=true" >> $GITHUB_OUTPUT
-          fi
