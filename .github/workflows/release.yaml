@@ -66,6 +66,31 @@ jobs:
             echo "skipnext=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Get Changelog for Specific Version
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
+        run: |
+          VERSION=${{ env.QBT_VERSION }}  # Specify the version you're interested in
+          REPO="qbittorrent/qBittorrent"
+          FILE_PATH="Changelog"
+          
+          # Fetch the changelog file content using GitHub API (raw URL)
+          CHANGES=$(curl -s "https://raw.githubusercontent.com/$REPO/master/$FILE_PATH")
+          
+          # Use awk to extract the section for the specified version
+          CHANGELOG_SECTION=$(echo "$CHANGES" | awk "/$VERSION/{flag=1} flag && /^$/{flag=0} flag" )
+          
+          # Output the extracted changelog for the specific version
+          echo "$CHANGELOG_SECTION"
+          echo "$CHANGELOG_SECTION" > changelog.txt
+          
+      - name: Create GitHub Tag
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ env.QBT_VERSION }} --latest --notes-file changelog.txt
+          gh release delete $QBT_LOCAL_VERSION --cleanup-tag
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         if: (matrix.platform != 'linux/386') && (matrix.platform != 'linux/amd64')
@@ -166,7 +191,7 @@ jobs:
       - name: Get Changelog for Specific Version
         if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         run: |
-          VERSION="v5.0.1"  # Specify the version you're interested in
+          VERSION=${{ env.QBT_VERSION }}  # Specify the version you're interested in
           REPO="qbittorrent/qBittorrent"
           FILE_PATH="Changelog"
           
@@ -178,14 +203,14 @@ jobs:
           
           # Output the extracted changelog for the specific version
           echo "$CHANGELOG_SECTION"
-          echo "CHANGELOG=$CHANGELOG_SECTION" >> $GITHUB_ENV
+          echo "$CHANGELOG_SECTION" > changelog.txt
           
       - name: Create GitHub Tag
         if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ env.QBT_VERSION }} --latest -n $CHANGELOG
+          gh release create ${{ env.QBT_VERSION }} --latest --notes-file changelog.txt
           gh release delete $QBT_LOCAL_VERSION --cleanup-tag
 
   upload:
