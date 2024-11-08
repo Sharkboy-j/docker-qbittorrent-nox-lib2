@@ -177,6 +177,30 @@ jobs:
     needs: build
 
     steps:
+      - name: Fetch Local Tag
+        id: fetch_local_tag
+        run: |
+          LATEST_LOCAL_TAG=$(curl -s https://api.github.com/repos/Sharkboy-j/docker-qbittorrent-nox-lib2/tags | jq -r '.[0].name')
+          echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> $GITHUB_ENV
+          echo "Fetched version without prefix: $LATEST_LOCAL_TAG"
+
+      - name: Fetch Latest Tag from qBittorrent
+        id: fetch_tag
+        run: |
+          LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
+          VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^release-//')
+          echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
+          echo "Fetched version without prefix: $VERSION_NUMBER"
+          
+      - name: Compare Versions and Break if Equal
+        id: compare_versions
+        run: |
+          echo "Comparing QBT_VERSION (${{ env.QBT_VERSION }}) with QBT_LOCAL_VERSION (${{ env.QBT_LOCAL_VERSION }})"
+          
+          if [ "${{ env.QBT_VERSION }}" == "${{ env.QBT_LOCAL_VERSION }}" ]; then
+            echo "skipnext=true" >> $GITHUB_OUTPUT
+          fi
+          
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
@@ -191,15 +215,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-          
-      - name: Fetch Latest Tag from qBittorrent
-        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
-        id: fetch_tag
-        run: |
-          LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
-          VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^release-//')
-          echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
-          echo "Fetched version without prefix: $VERSION_NUMBER"
           
       - name: Create multi-arch images
         if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
