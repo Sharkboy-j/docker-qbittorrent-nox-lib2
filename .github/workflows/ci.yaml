@@ -5,7 +5,8 @@ on: [pull_request, push]
 permissions:
   attestations: write
   id-token: write
-
+  contents: write
+  
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: ${{ github.head_ref != '' }}
@@ -25,6 +26,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Get Changelog for Specific Version
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         run: |
           VERSION="v5.0.1"  # Specify the version you're interested in
           REPO="qbittorrent/qBittorrent"
@@ -38,6 +40,14 @@ jobs:
           
           # Output the extracted changelog for the specific version
           echo "$CHANGELOG_SECTION"
+          echo "CHANGELOG=$CHANGELOG_SECTION" >> $GITHUB_ENV
+          
+      - name: Create GitHub Tag
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create test --latest -n $CHANGELOG
 
       - name: Set variables
         id: set-variables
