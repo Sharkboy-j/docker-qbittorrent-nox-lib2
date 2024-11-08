@@ -65,7 +65,18 @@ jobs:
           if [ "${{ env.QBT_VERSION }}" == "${{ env.QBT_LOCAL_VERSION }}" ]; then
             echo "skipnext=true" >> $GITHUB_OUTPUT
           fi
-
+          
+      - name: Set Environment Variables and Save to File
+        run: |
+          echo "QBT_VERSION=${{ env.QBT_VERSION }}" > versions.txt
+          echo "QBT_LOCAL_VERSION=${{ env.QBT_LOCAL_VERSION }}" >> versions.txt
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: versions_file
+          path: versions.txt
+          
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         if: (matrix.platform != 'linux/386') && (matrix.platform != 'linux/amd64')
@@ -194,20 +205,19 @@ jobs:
     needs: build
 
     steps:
-      - name: Fetch Local Tag
-        id: fetch_local_tag
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: versions_file
+          path: .
+          
+      - name: Read and Set Environment Variables
         run: |
-          LATEST_LOCAL_TAG=$(curl -s https://api.github.com/repos/Sharkboy-j/docker-qbittorrent-nox-lib2/tags | jq -r '.[0].name')
-          echo "QBT_LOCAL_VERSION=$LATEST_LOCAL_TAG" >> $GITHUB_ENV
-          echo "Fetched version without prefix: $LATEST_LOCAL_TAG"
-
-      - name: Fetch Latest Tag from qBittorrent
-        id: fetch_tag
-        run: |
-          LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
-          VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^release-//')
-          echo "QBT_VERSION=$VERSION_NUMBER" >> $GITHUB_ENV
-          echo "Fetched version without prefix: $VERSION_NUMBER"
+          source versions.txt
+          echo "QBT_VERSION is $QBT_VERSION"
+          echo "QBT_LOCAL_VERSION is $QBT_LOCAL_VERSION"
+          echo "QBT_VERSION=$QBT_VERSION" >> $GITHUB_ENV
+          echo "QBT_LOCAL_VERSION=$QBT_LOCAL_VERSION" >> $GITHUB_ENV
           
       - name: Compare Versions and Break if Equal
         id: compare_versions
