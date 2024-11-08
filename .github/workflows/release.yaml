@@ -60,9 +60,9 @@ jobs:
       - name: Compare Versions and Break if Equal
         id: compare_versions
         run: |
-          echo "Comparing QBT_VERSION (${{ env.QBT_VERSION }}) with QBT_LOCAL_VERSION ($QBT_LOCAL_VERSION)"
+          echo "Comparing QBT_VERSION (${{ env.QBT_VERSION }}) with QBT_LOCAL_VERSION (${{ env.QBT_LOCAL_VERSION }})"
           
-          if [ "${{ env.QBT_VERSION }}" == "$QBT_LOCAL_VERSION" ]; then
+          if [ "${{ env.QBT_VERSION }}" == "${{ env.QBT_LOCAL_VERSION }}" ]; then
             echo "skipnext=true" >> $GITHUB_OUTPUT
           fi
 
@@ -179,11 +179,13 @@ jobs:
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Login to GitHub Container registry
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -191,6 +193,7 @@ jobs:
           password: ${{ github.token }}
           
       - name: Fetch Latest Tag from qBittorrent
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         id: fetch_tag
         run: |
           LATEST_TAG=$(curl -s https://api.github.com/repos/qbittorrent/qBittorrent/tags | jq -r '.[0].name')
@@ -199,6 +202,7 @@ jobs:
           echo "Fetched version without prefix: $VERSION_NUMBER"
           
       - name: Create multi-arch images
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         run: |
           docker manifest create \
             sharkboy/qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
@@ -214,6 +218,7 @@ jobs:
             --amend ghcr.io/sharkboy-j/docker-qbittorrent-nox-lib2:latest-linux-amd64
 
       - name: Upload to registries
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         run: |
           docker manifest push sharkboy/qbittorrent-nox-lib2:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
           docker manifest push sharkboy/qbittorrent-nox-lib2:latest
@@ -222,6 +227,7 @@ jobs:
           echo "::notice Remember to remove latest-* tags from Docker Hub!"
           
       - name: Send Telegram Notification
+        if : ( steps.compare_versions.outputs.skipnext  != 'true' ) 
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_BOT_ID }}
