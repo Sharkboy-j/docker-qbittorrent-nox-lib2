@@ -168,10 +168,9 @@ jobs:
         run: |
           VERSION=${{ env.QBT_VERSION }}  # Specify the version you're interested in
           REPO="qbittorrent/qBittorrent"
-          FILE_PATH="Changelog"
           
           # Fetch the changelog file content using GitHub API (raw URL)
-          CHANGES=$(curl -s "https://raw.githubusercontent.com/$REPO/master/$FILE_PATH")
+          CHANGES=$(curl -s "https://raw.githubusercontent.com/qbittorrent/qBittorrent/refs/tags/release-$VERSION/Changelog")
           
           # Use awk to extract the section for the specified version
           CHANGELOG_SECTION=$(echo "$CHANGES" | awk "/$VERSION/{flag=1} flag && /^$/{flag=0} flag" )
